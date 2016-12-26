@@ -1,0 +1,20 @@
+{
+	"name": "weather-bot",
+		"version": "1.0.0",
+		"description": "Weather ChatBot",
+		"main": "index.js",
+		"dependencies": {
+			"body-parser": "^1.15.2",
+			"express": "^4.14.0",
+			"node-wit": "^4.2.0",
+			"request": "^2.79.0"
+		},
+		"devDependencies": {
+			"flow-bin": "^0.37.4"
+		},
+		"scripts": {
+			"flow": "flow; test $? -eq 0 -o $? -eq 2"
+		},
+		"author": "John Goss",
+		"license": "ISC"
+}
