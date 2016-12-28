@@ -29,34 +29,38 @@ const actions = {
     console.log('\n' + JSON.stringify(response).replace('{"text":"', '').replace('"}', '') + '\n')
   },
   getForecast ({context, entities}) {
-    var location = firstEntityValue(entities, 'location')
-    if (location) {
-      openweathermap(location, function (success, previsions) {
-        if (!success) {
-          console.log('An error occured when called openWeatherAPI, please try again.')
-        }
-        previsions ? context.forecast = ('There is the weather for : ' + previsions.city + ' Temperature : ' + previsions.temperature + '°C Moisture : ' + previsions.humidity + '% Wind : ' + previsions.wind + 'km/h')
-        : context.forecast = 'Error'
-      })
-      context.missingLocation = false
-    } else {
-      console.log('There is no location')
-      context.missingLocation = true
-      delete context.forecast
-    }
-    return context
+    return new Promise((resolve, reject) => {
+      var location = firstEntityValue(entities, 'location')
+      if (location) {
+        openWeatherMap(location, function (success, previsions) {
+          if (!success) {
+            console.log('An error occured when called openWeatherAPI, please try again.')
+            return reject('Failed to get meteo')
+          }
+          previsions ? context.forecast = ('There is the weather for : ' + previsions.city + ' Temperature : ' + previsions.temperature + '°C Moisture : ' + previsions.humidity + '% Wind : ' + previsions.wind + 'km/h')
+          : context.forecast = 'Error'
+          return resolve(context)
+        })
+        context.missingLocation = false
+      } else {
+        console.log('There is no location')
+        context.missingLocation = true
+        delete context.forecast
+        return reject('No location')
+      }
+    })
   }
 }
 
 // API openWeatherMap Function - Get the weather from API
 
-var openweathermap = function (city, callback) {
+var openWeatherMap = function (city, callback) {
   var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&lang=us&units=metric&appid=' + config.OPENWEATHER_TOKEN
 
   req(url, function (err, response, body) {
     try {
       var result = JSON.parse(body)
-      if (result.cod !== 200) {
+      if (result.cod !== 200 || err) {
         callback(false)
       } else {
         var previsions = {
